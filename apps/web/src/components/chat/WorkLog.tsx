@@ -77,7 +77,8 @@ function WorkLogLine({ icon, label, trailing, wrapLabel, ...lineProps }: RowCont
         ) : null}
         <div
           className={cn(
-            "min-w-0 flex-1 text-muted-foreground",
+            // Monospace and dimmed: tool activity must never pass for the reply itself.
+            "min-w-0 flex-1 font-mono text-muted-foreground/70",
             !wrapLabel && "truncate [&_*]:whitespace-nowrap",
           )}
         >
