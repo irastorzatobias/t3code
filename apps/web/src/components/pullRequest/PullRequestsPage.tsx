@@ -1211,14 +1211,13 @@ export function PullRequestsPage() {
   const panelToggleControls = (
     <PanelLayoutControls
       showTerminalControl={false}
-      showThreadPanelControl={false}
+      showThreadsControl={false}
       terminalAvailable={false}
       terminalOpen={false}
       terminalShortcutLabel={null}
-      threadPanelOpen={false}
-      threadPanelPresentation="inline"
-      threadPanelShortcutLabel={null}
-      onToggleThreadPanel={() => undefined}
+      threadsOpen={false}
+      threadsShortcutLabel={null}
+      onToggleThreads={() => undefined}
       rightPanelAvailable={rightPanelAvailable}
       rightPanelOpen={rightPanelState.isOpen}
       rightPanelShortcutLabel={shortcutLabelForCommand(keybindings, "rightPanel.toggle")}

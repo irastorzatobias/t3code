@@ -21,7 +21,11 @@ const container = { width: 1200, height: 800 };
 const placement = { x: 908, y: 0, right: 12, width: 280, height: 400 } as const;
 
 function setup() {
+  // The card starts closed; these cases exercise it open.
   useRightPanelStore.setState({ threadPanelVisibilityByThreadKey: {} });
+  for (const ref of [threadA, threadB]) {
+    useRightPanelStore.getState().setThreadPanelOpen(ref, "inline", true);
+  }
   const anchor = document.createElement("div");
   document.body.append(anchor);
   return {

@@ -167,6 +167,13 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
     useRightPanelStore.getState().open(activeThreadRef, "threads");
   };
   const addThreadsSurfaceStable = useStableCallback(addThreadsSurface);
+  const threadsOpen = rightPanelOpen && activeRightPanelSurface?.kind === "threads";
+  const toggleThreadsSurface = () => {
+    if (!activeThreadRef) return;
+    if (threadsOpen) useRightPanelStore.getState().close(activeThreadRef);
+    else addThreadsSurface();
+  };
+  const toggleThreadsSurfaceStable = useStableCallback(toggleThreadsSurface);
   const addDeviceSurface = () => {
     if (!activeThreadRef) return;
     if (!deviceState.onboardingCompleted || deviceState.hostStatus === "disabled") {
@@ -267,7 +274,6 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
     }
     store.toggleThreadPanel(activeThreadRef, threadPanelPresentation);
   };
-  const toggleThreadPanelStable = useStableCallback(toggleThreadPanel);
   const toggleRightPanelMaximized = () => {
     if (!canMaximizeRightPanel || !activeThreadRef) return;
     if (!rightPanelMaximized) requestWorkspaceFocus({ area: "panel" });
@@ -340,7 +346,7 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
       if (!event.repeat) closeRightPanelSurface(activeRightPanelSurface);
     },
     "diff.toggle": () => onToggleDiff(),
-    "threads.open": () => addThreadsSurface(),
+    "threads.open": () => toggleThreadsSurface(),
   } satisfies ChatShortcutCommands;
 
   return {
@@ -352,6 +358,8 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
     addPullRequestSurfaceStable,
     addPullRequestsSurfaceStable,
     addThreadsSurfaceStable,
+    threadsOpen,
+    toggleThreadsSurfaceStable,
     closePreviewPanelStable,
     copyRightPanelFilePathStable,
     createBrowserSurface,
@@ -364,6 +372,5 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
     openFileSurfaceStable,
     toggleRightPanelMaximizedStable,
     toggleRightPanelStable,
-    toggleThreadPanelStable,
   };
 }

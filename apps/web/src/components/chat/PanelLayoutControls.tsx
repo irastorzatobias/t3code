@@ -1,7 +1,7 @@
 import {
+  ListFilterIcon,
   PanelBottomIcon,
   PanelRightIcon,
-  SquareMenuIcon,
   Maximize2Icon,
   Minimize2Icon,
 } from "lucide-react";
@@ -10,80 +10,67 @@ import { memo, type ReactNode, useLayoutEffect, useRef } from "react";
 
 import { cn } from "~/lib/utils";
 
-import type { ThreadPanelPresentation } from "../../rightPanelLayout";
-import { PopoverCreateHandle, PopoverTrigger } from "../ui/popover";
 import { useMobileSidebarSheetMounted } from "../ui/sidebar";
 import { Toggle } from "../ui/toggle";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 
-/** Matches the right inset of `ThreadPanelHeaderControl`. */
+/** Matches the right inset of `ThreadsHeaderControl`. */
 const THREAD_PANEL_HEADER_INSET_PX = 12;
 
 export interface PanelLayoutControlsProps {
-  showThreadPanelControl?: boolean;
+  showThreadsControl?: boolean;
   showTerminalControl?: boolean;
   showRightPanelControl?: boolean;
   terminalAvailable: boolean;
   terminalOpen: boolean;
   terminalShortcutLabel: string | null;
-  threadPanelOpen: boolean;
-  threadPanelPresentation: ThreadPanelPresentation;
-  threadPanelPopoverHandle?: ReturnType<typeof PopoverCreateHandle>;
-  threadPanelShortcutLabel: string | null;
+  threadsOpen: boolean;
+  threadsShortcutLabel: string | null;
   rightPanelAvailable: boolean;
   rightPanelOpen: boolean;
   rightPanelShortcutLabel: string | null;
   rightPanelUnavailableLabel?: string;
   onToggleTerminal: () => void;
-  onToggleThreadPanel: () => void;
+  onToggleThreads: () => void;
   onToggleRightPanel: () => void;
 }
 
 export const PanelLayoutControls = memo(function PanelLayoutControls({
-  showThreadPanelControl = true,
+  showThreadsControl = true,
   showTerminalControl = true,
   showRightPanelControl = true,
   terminalAvailable,
   terminalOpen,
   terminalShortcutLabel,
-  threadPanelOpen,
-  threadPanelPresentation,
-  threadPanelPopoverHandle,
-  threadPanelShortcutLabel,
+  threadsOpen,
+  threadsShortcutLabel,
   rightPanelAvailable,
   rightPanelOpen,
   rightPanelShortcutLabel,
   rightPanelUnavailableLabel,
   onToggleTerminal,
-  onToggleThreadPanel,
+  onToggleThreads,
   onToggleRightPanel,
 }: PanelLayoutControlsProps) {
   const gt = useGT();
-  const threadPanelToggle = (
-    <Toggle
-      className="relative shrink-0 [-webkit-app-region:no-drag]"
-      pressed={threadPanelOpen}
-      onPressedChange={threadPanelPresentation === "popover" ? undefined : onToggleThreadPanel}
-      aria-label={gt("Toggle thread details panel")}
-      variant="ghost"
-      size="sm"
-    >
-      <SquareMenuIcon className="size-4" />
-    </Toggle>
-  );
-  const threadPanelControl = (
+  const threadsControl = (
     <Tooltip>
-      <TooltipTrigger render={<span className="flex shrink-0" data-thread-panel-toggle />}>
-        {threadPanelPresentation === "popover" ? (
-          <PopoverTrigger handle={threadPanelPopoverHandle} render={threadPanelToggle} />
-        ) : (
-          threadPanelToggle
-        )}
+      <TooltipTrigger render={<span className="flex shrink-0" data-threads-toggle />}>
+        <Toggle
+          className="relative shrink-0 [-webkit-app-region:no-drag]"
+          pressed={threadsOpen}
+          onPressedChange={onToggleThreads}
+          aria-label={gt("Toggle threads")}
+          variant="ghost"
+          size="sm"
+        >
+          <ListFilterIcon className="size-4" />
+        </Toggle>
       </TooltipTrigger>
       <TooltipPopup side="bottom">
-        {threadPanelShortcutLabel
-          ? gt("Toggle thread details ({shortcut})", { shortcut: threadPanelShortcutLabel })
-          : gt("Toggle thread details")}
+        {threadsShortcutLabel
+          ? gt("Toggle threads ({shortcut})", { shortcut: threadsShortcutLabel })
+          : gt("Toggle threads")}
       </TooltipPopup>
     </Tooltip>
   );
@@ -93,7 +80,7 @@ export const PanelLayoutControls = memo(function PanelLayoutControls({
       className="flex h-full shrink-0 items-center gap-1 [-webkit-app-region:no-drag]"
       data-panel-layout-controls
     >
-      {showThreadPanelControl ? threadPanelControl : null}
+      {showThreadsControl ? threadsControl : null}
       {showTerminalControl ? (
         <Tooltip>
           <TooltipTrigger render={<span className="flex shrink-0" />}>
@@ -181,8 +168,8 @@ export const RightPanelMaximizeControl = memo(function RightPanelMaximizeControl
   );
 });
 
-/** The thread panel toggle on a header whose right side the inline right panel covers. */
-export function ThreadPanelHeaderControl(props: PanelLayoutControlsProps) {
+/** The threads toggle on a header whose right side the inline right panel covers. */
+export function ThreadsHeaderControl(props: PanelLayoutControlsProps) {
   const mobileSidebarSheetMounted = useMobileSidebarSheetMounted();
   return (
     <div
