@@ -234,6 +234,13 @@ On mobile, the thread list search also lists message matches and opens them at
 the matching message; on an iPad with a keyboard, `Cmd+K` opens the same
 palette.
 
+To keep every thread in view beside the one you are working in, open the
+**Threads** tab in the right panel (`Cmd/Ctrl+Alt+T`, or **Show all threads** in
+the palette). It searches the same way and filters threads by what they need:
+**Needs you** (a question, approval, or usage limit), **Failing** (a failed run,
+failing checks, or a conflict on the open pull request), **Unread**, and
+**Working**. Opening a thread from it keeps the tab open in that thread.
+
 Use **Settings → Keybindings** to find or customize shortcuts for searching files
 and copying a thread reference. A copied reference uses the thread's pull request
 link when available, otherwise a link to the thread, which opens it from anywhere

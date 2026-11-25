@@ -47,6 +47,7 @@ import {
   FileDiff,
   Files,
   Globe2,
+  ListFilter,
   MessagesSquare,
   Plus,
   TerminalSquare,
@@ -151,6 +152,8 @@ export interface RightPanelTabsProps {
   onAddDevice: () => void;
   /** Absent where side chats are not offered. */
   onAddSideChat?: (() => void) | undefined;
+  /** Absent outside a thread, where the thread list has no thread to follow. */
+  onAddThreads?: (() => void) | undefined;
   browserAvailable: boolean;
   terminalAvailable: boolean;
   diffAvailable: boolean;
@@ -335,6 +338,8 @@ function RightPanelEmptyState(props: {
   onAddDevice: () => void;
   /** Absent where side chats are not offered. */
   onAddSideChat?: (() => void) | undefined;
+  /** Absent outside a thread, where the thread list has no thread to follow. */
+  onAddThreads?: (() => void) | undefined;
   browserAvailable: boolean;
   terminalAvailable: boolean;
   diffAvailable: boolean;
@@ -398,6 +403,19 @@ function RightPanelEmptyState(props: {
       disabledReason: messages(SURFACE_UNAVAILABLE_HINTS.pullRequests),
       onClick: props.onAddPullRequests,
     },
+    ...(props.onAddThreads
+      ? [
+          {
+            label: msg("Threads"),
+            description: msg("Search every thread and see which ones need you."),
+            icon: ListFilter,
+            shortcut: "H",
+            available: true,
+            disabledReason: "",
+            onClick: props.onAddThreads,
+          },
+        ]
+      : []),
     {
       label: msg("Device"),
       description: msg("Watch an iOS Simulator or Android Emulator."),
@@ -607,6 +625,8 @@ function surfaceTitle(
       return `#${surface.number}`;
     case "pull-requests":
       return resolve(msg("Linked items"));
+    case "threads":
+      return resolve(msg("Threads"));
     case "issue":
       // A git host numbers its issues; a tracker with keys of its own, such as Linear, names them.
       return /^\d+$/.test(surface.key) ? `#${surface.key}` : surface.key;
@@ -702,6 +722,8 @@ function SurfaceIcon({
       );
     case "pull-requests":
       return <PullRequestGlyph.link className="size-3 shrink-0" />;
+    case "threads":
+      return <ListFilter className="size-3 shrink-0" />;
     case "issue":
       return <IssueSurfaceIcon surface={surface} environmentId={environmentId} />;
     case "side-chat":
@@ -1217,6 +1239,18 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
       disabledReason: messages(SURFACE_DISABLED_REASONS.pullRequests),
       onClick: props.onAddPullRequests,
     },
+    ...(props.onAddThreads
+      ? [
+          {
+            label: msg("Threads"),
+            icon: ListFilter,
+            shortcut: "H",
+            available: true,
+            disabledReason: "",
+            onClick: props.onAddThreads,
+          },
+        ]
+      : []),
     {
       label: msg("Device"),
       icon: Smartphone,
@@ -1643,6 +1677,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
             onAddPullRequests={props.onAddPullRequests}
             onAddDevice={props.onAddDevice}
             onAddSideChat={props.onAddSideChat}
+            onAddThreads={props.onAddThreads}
             browserAvailable={props.browserAvailable}
             terminalAvailable={props.terminalAvailable}
             diffAvailable={props.diffAvailable}

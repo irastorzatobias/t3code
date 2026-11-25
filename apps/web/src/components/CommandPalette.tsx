@@ -72,6 +72,7 @@ import {
   FolderPlusIcon,
   MessageSquareDashedIcon,
   LinkIcon,
+  ListFilterIcon,
   MessageSquareIcon,
   PaletteIcon,
   RotateCcwIcon,
@@ -1520,6 +1521,21 @@ function OpenCommandPaletteDialog(props: {
       icon: <PullRequestGlyph.link className={ITEM_ICON_CLASS} />,
       run: async () => {
         useRightPanelStore.getState().open(threadRef, "pull-requests");
+      },
+    });
+  }
+
+  if (activeThread) {
+    const threadRef = scopeThreadRef(activeThread.environmentId, activeThread.id);
+    actionItems.push({
+      kind: "action",
+      value: "action:open-threads-panel",
+      searchTerms: ["threads", "search", "filter", "needs attention", "failing", "unread"],
+      title: gt("Show all threads"),
+      icon: <ListFilterIcon className={ITEM_ICON_CLASS} />,
+      shortcutCommand: "threads.open",
+      run: async () => {
+        useRightPanelStore.getState().open(threadRef, "threads");
       },
     });
   }
