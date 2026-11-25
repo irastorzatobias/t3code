@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "../../lib/utils";
+import { observeVisibleAnimation } from "../../lib/visibleAnimation";
 
 const GroupedRows = createContext(false);
 
@@ -23,16 +24,33 @@ export function WorkLogBlock({
 }) {
   return (
     <div
-      className={
+      className={cn(
+        // One margin lane for all agent work: a hairline the reply never has. Consecutive blocks
+        // drop their bottom padding, so the rule runs unbroken through a stretch of work.
+        "relative border-s border-primary/50 ps-3",
         continues || layout === "group-header"
           ? "pb-0"
           : layout === "group-content"
             ? "pb-1"
-            : "pb-2"
-      }
+            : "pb-2",
+      )}
     >
       {children}
     </div>
+  );
+}
+
+/**
+ * The heartbeat of the lane while the agent works: its live segment beats with the same
+ * stepped pulse as the sidebar's working dot, and holds still, but solid, under reduced motion.
+ */
+export function WorkLogPulse() {
+  return (
+    <span
+      aria-hidden
+      ref={observeVisibleAnimation}
+      className="pointer-events-none absolute inset-y-0 -start-0.5 w-0.5 rounded-full bg-primary visible-animate-status-pulse"
+    />
   );
 }
 

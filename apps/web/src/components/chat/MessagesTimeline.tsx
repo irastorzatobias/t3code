@@ -9,7 +9,7 @@ import { AudioPreviewUnmountContext } from "../files/AudioPreview";
 import { ThreadFindTimelineContext } from "./ThreadFindProvider";
 import { MarkdownFindContext } from "./markdownFindContext";
 import { useChatCanvas } from "./ChatCanvasContext";
-import { WorkLogBlock } from "./WorkLog";
+import { WorkLogBlock, WorkLogPulse } from "./WorkLog";
 import { TimelinePendingApprovalRow } from "./TimelinePendingApprovalRow";
 import type { WorktreeSetupSnapshot } from "@t3tools/contracts";
 import { deriveTimelineMinimapItems } from "./timelineMinimapItems";
@@ -1737,6 +1737,9 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
           {row.kind === "work-live" ? <LiveWorkEntryTimelineRow row={row} /> : null}
           {row.kind === "work-toggle" ? <WorkGroupToggleTimelineRow row={row} /> : null}
           {row.kind === "thinking" ? <ThinkingTimelineRow row={row} /> : null}
+          {(row.kind === "work-live" && row.active) || row.kind === "thinking" ? (
+            <LiveLanePulse />
+          ) : null}
         </WorkLogBlock>
       ) : null}
       {row.kind === "turn-fold" ? <TurnFoldTimelineRow key={row.id} row={row} /> : null}
@@ -1758,6 +1761,12 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
     </div>
   );
 });
+
+/** Reads the activity context here, not in the row, so a working-state change re-renders only this. */
+function LiveLanePulse() {
+  const { isWorking, awaitingUser } = use(TimelineRowActivityCtx);
+  return isWorking && !awaitingUser ? <WorkLogPulse /> : null;
+}
 
 function WorktreeSetupTimelineRow({
   row,

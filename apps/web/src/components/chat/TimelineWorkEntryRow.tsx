@@ -524,9 +524,7 @@ function WorkEntryLogRow(props: WorkEntryRowProps) {
     ? "font-medium text-warning"
     : showDestructiveRowStyle
       ? "font-medium text-destructive"
-      : workLogEntryIsToolLike(workEntry)
-        ? "text-secondary-label"
-        : "text-foreground/80";
+      : undefined;
   const threadLabel = isReasoning ? null : threadReadLabel(previewText, workEntry, threadTarget, m);
   const accessiblePreview = [threadLabel?.text ?? previewText, answerPreview]
     .filter(Boolean)
@@ -572,7 +570,7 @@ function WorkEntryLogRow(props: WorkEntryRowProps) {
       }
       label={
         <div className="min-w-0 flex-1 overflow-hidden">
-          <p className="flex min-w-0 w-full items-baseline gap-1.5 text-sm leading-relaxed">
+          <p className="flex min-w-0 w-full items-baseline gap-1.5">
             <span
               ref={labelRef}
               className={cn(

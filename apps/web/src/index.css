@@ -604,6 +604,13 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   }
 }
 
+@utility visible-animate-status-pulse {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: var(--animate-status-pulse);
+    animation-play-state: var(--visible-animation-state, paused);
+  }
+}
+
 @utility visible-animate-spin {
   animation: var(--animate-spin);
   animation-play-state: var(--visible-animation-state, paused);
