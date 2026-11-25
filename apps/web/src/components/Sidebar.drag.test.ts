@@ -4,6 +4,7 @@ import type { SortingStrategy } from "@dnd-kit/sortable";
 import {
   createSidebarCollisionDetection,
   createSidebarSortingStrategy,
+  folderModeAllowsReorder,
   restrictBelowSidebarLabel,
 } from "./Sidebar.drag";
 import {
@@ -724,5 +725,23 @@ describe("lifted card clearance", () => {
   it("follows the list when it scrolls and includes content preceding Pins", () => {
     expect(511 + apply(511, 36, -500, 96).y).toBe(128);
     expect(511 + apply(511, 36, -500, 136, 114).y).toBe(250);
+  });
+});
+
+describe("folderModeAllowsReorder", () => {
+  it("lets only pinned rows reorder", () => {
+    expect(folderModeAllowsReorder("pinned")).toBe(true);
+    for (const section of ["active", "working", "snoozed", "settled"] as const) {
+      expect(folderModeAllowsReorder(section)).toBe(false);
+    }
+    expect(folderModeAllowsReorder(undefined)).toBe(false);
+  });
+
+  it("keeps a pinned row inside the pinned section", () => {
+    expect(folderModeAllowsReorder("pinned", "pinned")).toBe(true);
+    for (const section of ["active", "working", "snoozed", "settled"] as const) {
+      expect(folderModeAllowsReorder("pinned", section)).toBe(false);
+    }
+    expect(folderModeAllowsReorder("pinned", null)).toBe(false);
   });
 });

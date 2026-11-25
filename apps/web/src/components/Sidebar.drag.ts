@@ -19,6 +19,19 @@ const isShelfHeader = (item: SidebarListItem | undefined) =>
     item.marker === "snoozed-header" ||
     item.marker === "settled-header");
 
+/**
+ * With project folders, folders own their threads' order, so only a pinned row reorders, and only
+ * within the pinned section. Every other drag is a context drag toward the composer.
+ * Omit `targetSection` to ask whether a drag from `activeSection` can reorder at all.
+ */
+export function folderModeAllowsReorder(
+  activeSection: SidebarSection | undefined,
+  targetSection?: SidebarSection | null,
+): boolean {
+  if (activeSection !== "pinned") return false;
+  return targetSection === undefined || targetSection === "pinned";
+}
+
 export function restrictBelowSidebarLabel(
   { transform, containerNodeRect, draggingNodeRect }: Parameters<Modifier>[0],
   offset: number,
