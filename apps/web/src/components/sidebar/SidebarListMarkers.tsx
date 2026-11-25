@@ -85,8 +85,16 @@ export function SidebarDragBoundary(props: {
     <SortableSidebarMarker
       marker={props.marker}
       data-testid={`sidebar-${props.marker}`}
-      className="pointer-events-none relative mx-0.5 -mb-px h-0"
+      className={cn(
+        "pointer-events-none relative mx-0.5",
+        // The divider keeps a fixed gap, drag or not, so rows never shift mid-drag.
+        props.marker === "pinned-divider" ? "h-3" : "-mb-px h-0",
+      )}
     >
+      {!props.visible && props.marker === "pinned-divider" ? (
+        // At rest, a hairline sets pinned threads apart from the list below.
+        <div aria-hidden className="absolute inset-x-2 top-1/2 h-px bg-sidebar-foreground/15" />
+      ) : null}
       {props.visible ? (
         <div className="sidebar-drag-boundary-label absolute inset-x-2 top-1 flex h-4 items-center gap-2">
           <span
