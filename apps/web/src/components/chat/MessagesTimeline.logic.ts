@@ -2926,6 +2926,26 @@ function isRowUnchanged(a: MessagesTimelineRow, b: MessagesTimelineRow): boolean
   }
 }
 
+export interface TimelineRewindTarget {
+  readonly turnCount: number;
+  readonly messageId: MessageId;
+}
+
+/** The newest user message the chat can rewind to: what Esc Esc on an empty composer edits. */
+export function latestTimelineRewindTarget(
+  rows: ReadonlyArray<MessagesTimelineRow>,
+): TimelineRewindTarget | null {
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    const row = rows[index];
+    if (row?.kind === "message" && row.message.role === "user") {
+      if (typeof row.revertTurnCount === "number") {
+        return { turnCount: row.revertTurnCount, messageId: row.message.id };
+      }
+    }
+  }
+  return null;
+}
+
 export function handoffRunsSignature(runs: ReadonlyArray<HandoffTimelineRun>): string {
   return runs
     .map(

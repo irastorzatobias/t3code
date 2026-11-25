@@ -48,6 +48,7 @@ import {
   useRef,
   useState,
   type ReactNode,
+  type RefObject,
   type SyntheticEvent,
 } from "react";
 import {
@@ -92,8 +93,10 @@ import {
   TIMELINE_MINIMAP_TARGET_OFFSET,
   timelineTurnFoldRunIdsByEntryId,
   liveAnswerPreview,
+  latestTimelineRewindTarget,
   type MessagesTimelineRow,
   type TimelineLatestRun,
+  type TimelineRewindTarget,
 } from "./MessagesTimeline.logic";
 import { type ThreadFindMatch } from "./threadFind";
 import { useThreadFindNavigation } from "./useThreadFindNavigation";
@@ -312,6 +315,8 @@ interface MessagesTimelineProps {
   threadStartCheckpointAvailable?: boolean;
   availableRevertTurnCounts?: ReadonlySet<number> | undefined;
   onRevertToTurnCount: (targetTurnCount: number, messageId: MessageId) => void;
+  /** Holds the newest rewindable user message, for the parent's Esc Esc shortcut. */
+  rewindTargetRef?: RefObject<TimelineRewindTarget | null> | undefined;
   onUseArtifactTemplate?: (template: CodexArtifactTemplate) => void;
   onSendAppMessage?: (text: string) => Promise<void>;
   onRunShellCommand?: (command: string) => void;
@@ -415,6 +420,7 @@ const ConversationTimeline = memo(function ConversationTimeline({
   threadStartCheckpointAvailable = false,
   availableRevertTurnCounts,
   onRevertToTurnCount,
+  rewindTargetRef,
   onUseArtifactTemplate = NOOP_USE_ARTIFACT_TEMPLATE,
   onSendAppMessage,
   onRunShellCommand,
@@ -782,6 +788,11 @@ const ConversationTimeline = memo(function ConversationTimeline({
     revealedMessageId,
   });
   const rows = useStableRows(rawRows, listIdentityKey);
+  const rewindTarget = latestTimelineRewindTarget(rows);
+  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- publishes the newest rewindable message to the parent's Esc Esc shortcut, which reads it at keypress time
+  useLayoutEffect(() => {
+    if (rewindTargetRef) rewindTargetRef.current = rewindTarget;
+  });
   const matchedApprovalRequestIds = new Set<string>();
   for (const row of pendingApprovalRequestIds.size > 0 ? rows : []) {
     const entries =

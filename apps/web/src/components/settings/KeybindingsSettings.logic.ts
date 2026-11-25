@@ -507,6 +507,7 @@ const COMMAND_LABELS: Partial<Record<KeybindingCommand, string>> = {
   "modelPicker.previousProvider": msg("Model Picker: Previous Provider"),
   "modelPicker.nextProvider": msg("Model Picker: Next Provider"),
   "thread.stop": msg("Thread: Stop"),
+  "thread.rewind": msg("Thread: Rewind to Last Message (press twice)"),
   "thread.previous": msg("Thread: Previous"),
   "thread.next": msg("Thread: Next"),
   "thread.settle": msg("Thread: Settle"),

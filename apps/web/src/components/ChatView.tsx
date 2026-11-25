@@ -310,6 +310,10 @@ import {
 import type { AssistantCitationRequest } from "./chat/AssistantCitationSource";
 import { useCitedHistory } from "./chat/citationProcedure";
 import type { MessagesTimelineHistoryControls } from "./chat/MessagesTimeline";
+import type { TimelineRewindTarget } from "./chat/MessagesTimeline.logic";
+
+/** Two Escapes this close together on an empty composer rewind the chat. */
+const REWIND_DOUBLE_ESCAPE_MS = 500;
 import { ThreadTimeline } from "./chat/ThreadTimeline";
 import { NativeChildWorkDialog } from "./chat/NativeChildWorkDialog";
 import { ProviderSubagentBar } from "./chat/ProviderSubagentBar";
@@ -552,6 +556,9 @@ export default function ChatView(props: ChatViewProps) {
         });
   const promptRef = useRef("");
   const localComposerRef = useRef<ChatComposerHandle | null>(null);
+  // Esc Esc on an empty composer rewinds to the newest message the timeline can rewind to.
+  const rewindTargetRef = useRef<TimelineRewindTarget | null>(null);
+  const lastRewindEscapeAtRef = useRef(0);
   const composerRef = useComposerHandleContext() ?? localComposerRef;
   const queuedRunEdit = useQueuedRunEdit({
     environmentId,
@@ -2968,6 +2975,25 @@ export default function ChatView(props: ChatViewProps) {
         if (!canInterruptRunningThread) return false;
         if (!event.repeat) void onInterruptStable();
       },
+      // Reaches here only when nothing in the composer used the Escape (menus, suggestions).
+      "thread.rewind": ({ event }) => {
+        const previousAt = lastRewindEscapeAtRef.current;
+        lastRewindEscapeAtRef.current = 0;
+        if (event.repeat || composerRef.current?.readSnapshot().value.trim() !== "") return false;
+        // A running turn stops first, as in a terminal agent; the next Esc Esc rewinds.
+        if (canInterruptRunningThread) {
+          void onInterruptStable();
+          return;
+        }
+        const target = rewindTargetRef.current;
+        if (target === null || isRevertingCheckpoint) return false;
+        const now = event.timeStamp;
+        if (now - previousAt > REWIND_DOUBLE_ESCAPE_MS) {
+          lastRewindEscapeAtRef.current = now;
+          return false;
+        }
+        onRevertTimelineTurnStable(target.turnCount, target.messageId);
+      },
     },
     fallback: (command) => {
       const scriptId = projectScriptIdFromCommand(command);
@@ -3718,6 +3744,7 @@ export default function ChatView(props: ChatViewProps) {
                   threadStartCheckpointAvailable={threadStartCheckpointAvailable}
                   availableRevertTurnCounts={availableRevertTurnCounts}
                   onRevertToTurnCount={onRevertTimelineTurnStable}
+                  rewindTargetRef={rewindTargetRef}
                   onUseArtifactTemplate={insertArtifactTemplateStable}
                   onSendAppMessage={sendAppMessageStable}
                   isRevertingCheckpoint={isRevertingCheckpoint}
