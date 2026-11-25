@@ -49,6 +49,11 @@ export const SidebarProjectFolderHeader = memo(function SidebarProjectFolderHead
     position: { x: number; y: number },
     source: ContextMenuSource,
   ) => void;
+  /** Starts a reorder drag from a press on the folder row. */
+  onDragStart: (group: SidebarProjectSnapshot, event: PointerEvent) => void;
+  dragging: boolean;
+  /** No active threads: the name reads quieter. */
+  empty: boolean;
 }) {
   const gt = useGT();
   const m = useMessages();
@@ -71,13 +76,22 @@ export const SidebarProjectFolderHeader = memo(function SidebarProjectFolderHead
   return (
     <li
       data-testid="sidebar-project-folder"
-      className="group/project-folder relative mt-2 list-none first:mt-0"
+      data-sidebar-folder-key={group.projectKey}
+      data-dragging={props.dragging || undefined}
+      className={cn(
+        "group/project-folder relative mt-2 list-none first:mt-0",
+        props.dragging && "z-10 rounded-(--control-radius) bg-sidebar-row-hover shadow-md",
+      )}
     >
       <button
         type="button"
         data-sidebar-row={rowId}
         aria-expanded={!collapsed}
         onClick={() => props.onToggle(group)}
+        onPointerDown={(event) => {
+          if (event.button !== 0 || !event.isPrimary) return;
+          props.onDragStart(group, event.nativeEvent);
+        }}
         onContextMenu={(event) => {
           event.preventDefault();
           props.onContextMenu(
@@ -89,7 +103,12 @@ export const SidebarProjectFolderHeader = memo(function SidebarProjectFolderHead
         className="flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-(--control-radius) px-(--sidebar-row-content-inset) text-left outline-none hover:bg-sidebar-row-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
         <ProjectFavicon project={group} className="size-4 shrink-0" />
-        <span className="min-w-0 flex-1 truncate text-sm font-medium text-sidebar-foreground/90">
+        <span
+          className={cn(
+            "min-w-0 flex-1 truncate text-sm font-medium",
+            props.empty ? "text-sidebar-muted-foreground" : "text-sidebar-foreground/90",
+          )}
+        >
           {group.displayName}
         </span>
         {dot ? (
@@ -133,6 +152,35 @@ export const SidebarProjectFolderHeader = memo(function SidebarProjectFolderHead
           </TooltipPopup>
         </Tooltip>
       </span>
+    </li>
+  );
+});
+
+/** Stands in for the rows of an open folder with no active threads, with a way to start one. */
+export const SidebarProjectFolderEmpty = memo(function SidebarProjectFolderEmpty(props: {
+  group: SidebarProjectSnapshot;
+  onNewThread: (group: SidebarProjectSnapshot) => void;
+}) {
+  const { group } = props;
+  return (
+    <li
+      data-testid="sidebar-project-folder-empty"
+      className="flex h-8 list-none items-center gap-2.5 pr-1 pl-(--sidebar-row-content-inset)"
+    >
+      {/* Lines the text up with the folder name, past its icon. */}
+      <span aria-hidden className="size-4 shrink-0" />
+      <span className="min-w-0 flex-1 truncate text-xs text-sidebar-muted-foreground/70">
+        <T>No active threads</T>
+      </span>
+      <Button
+        size="xs"
+        variant="ghost-muted"
+        className="shrink-0"
+        onClick={() => props.onNewThread(group)}
+      >
+        <SquarePenIcon aria-hidden />
+        <T>New thread</T>
+      </Button>
     </li>
   );
 });
