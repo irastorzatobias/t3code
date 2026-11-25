@@ -591,6 +591,24 @@ export async function deleteSelectedThreadEntries<
 }
 
 /**
+ * A pinned thread with no project is a standing agent (an auditor, a listener): part of
+ * the daily routine, so it stays listed under any project scope and shows as one line.
+ * `agentProjectKeys` holds the "No project" keys, `${environmentId}:${projectId}`.
+ */
+export function isSidebarAgentThread(
+  thread: {
+    readonly pinnedAt?: string | null;
+    readonly environmentId: string;
+    readonly projectId: string;
+  },
+  agentProjectKeys: ReadonlySet<string>,
+): boolean {
+  return (
+    thread.pinnedAt != null && agentProjectKeys.has(`${thread.environmentId}:${thread.projectId}`)
+  );
+}
+
+/**
  * `delegatedUnderParent` holds the tasks linked environments run for a thread
  * the sidebar lists, by thread key; they show under that thread, as subagents do.
  */
@@ -602,6 +620,7 @@ export function filterSidebarV2VisibleThreads<
   threads: readonly T[],
   scopedProjectKeys: ReadonlySet<string> | null,
   delegatedUnderParent: ReadonlySet<string>,
+  agentProjectKeys: ReadonlySet<string> = new Set(),
 ): T[] {
   return threads.filter(
     (thread) =>
@@ -612,7 +631,8 @@ export function filterSidebarV2VisibleThreads<
         delegatedUnderParent,
       ) &&
       (scopedProjectKeys === null ||
-        scopedProjectKeys.has(`${thread.environmentId}:${thread.projectId}`)),
+        scopedProjectKeys.has(`${thread.environmentId}:${thread.projectId}`) ||
+        isSidebarAgentThread(thread, agentProjectKeys)),
   );
 }
 
