@@ -4,7 +4,7 @@ import { effectiveSnoozed } from "@t3tools/client-runtime/state/thread-settled";
 import { threadSearchMatchKey } from "@t3tools/client-runtime/state/thread-search";
 import { resolveThreadCurrentPullRequestLink } from "@t3tools/client-runtime/thread-pull-requests";
 import { sortThreads } from "@t3tools/client-runtime/state/thread-sort";
-import type { EnvironmentId } from "@t3tools/contracts";
+import type { EnvironmentId, ScopedThreadRef } from "@t3tools/contracts";
 import { LegendList } from "@legendapp/list/react";
 import { useNavigate } from "@tanstack/react-router";
 import { msg, T, useGT, useMessages } from "gt-react";
@@ -44,21 +44,19 @@ const FILTER_LABELS: Record<ThreadsPanelFilter, string> = {
 const LINK_CLASS =
   "pointer-events-auto relative z-10 inline-flex shrink-0 items-center gap-1 rounded-sm text-xs text-muted-foreground tabular-nums hover:text-foreground hover:underline";
 
-function ThreadPullRequestLink({ thread }: { thread: SidebarThreadSummary }) {
+// Links open in the panel being looked at; the row's own thread may not be on screen.
+type RowLinkProps = { thread: SidebarThreadSummary; panelThreadRef: ScopedThreadRef };
+
+function ThreadPullRequestLink({ thread, panelThreadRef }: RowLinkProps) {
   const resolve = useMessages();
-  const threadRef = scopeThreadRef(thread.environmentId, thread.id);
-  const openPrLink = useOpenPrLink(threadRef);
+  const openPrLink = useOpenPrLink(panelThreadRef);
   const link = resolveThreadCurrentPullRequestLink(thread.pullRequests);
   if (link === null) return null;
   const checksState = link.snapshot?.checksState ?? null;
   const checks =
     checksState === null ? null : pullRequestChecksStatePresentation(checksState, resolve);
   return (
-    <a
-      href={link.url}
-      onClick={(event) => openPrLink(event, link.url, threadRef)}
-      className={LINK_CLASS}
-    >
+    <a href={link.url} onClick={(event) => openPrLink(event, link.url)} className={LINK_CLASS}>
       {checks ? (
         <checks.Icon
           role="img"
@@ -71,9 +69,8 @@ function ThreadPullRequestLink({ thread }: { thread: SidebarThreadSummary }) {
   );
 }
 
-function ThreadIssueLink({ thread }: { thread: SidebarThreadSummary }) {
-  const threadRef = scopeThreadRef(thread.environmentId, thread.id);
-  const openLink = useOpenLink(threadRef);
+function ThreadIssueLink({ thread, panelThreadRef }: RowLinkProps) {
+  const openLink = useOpenLink(panelThreadRef);
   const issue = thread.issues?.[0];
   if (issue === undefined) return null;
   return (
@@ -82,7 +79,7 @@ function ThreadIssueLink({ thread }: { thread: SidebarThreadSummary }) {
       onClick={(event) => {
         if (event.button > 1) return;
         event.preventDefault();
-        void openLink(issue.url, { event, threadRef });
+        void openLink(issue.url, { event });
       }}
       className={LINK_CLASS}
     >
@@ -109,9 +106,11 @@ function ThreadsPanelRow({
   thread,
   projectTitle,
   striped,
+  panelThreadRef,
   onOpen,
 }: {
   thread: SidebarThreadSummary;
+  panelThreadRef: ScopedThreadRef;
   projectTitle: string | null;
   striped: boolean;
   onOpen: () => void;
@@ -139,9 +138,9 @@ function ThreadsPanelRow({
           </span>
         ) : null}
       </span>
-      <ThreadIssueLink thread={thread} />
+      <ThreadIssueLink thread={thread} panelThreadRef={panelThreadRef} />
       <span className="flex w-16 shrink-0 justify-end">
-        <ThreadPullRequestLink thread={thread} />
+        <ThreadPullRequestLink thread={thread} panelThreadRef={panelThreadRef} />
       </span>
       <span className="pointer-events-none relative w-14 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
         <RelativeTime timestamp={thread.updatedAt} />
@@ -151,7 +150,7 @@ function ThreadsPanelRow({
 }
 
 /** Every thread across projects, searchable and filtered by what it needs from the user. */
-export function ThreadsPanel() {
+export function ThreadsPanel({ panelThreadRef }: { panelThreadRef: ScopedThreadRef }) {
   const gt = useGT();
   const resolve = useMessages();
   const navigate = useNavigate();
@@ -259,6 +258,7 @@ export function ThreadsPanel() {
             <ThreadsPanelRow
               thread={thread}
               striped={index % 2 === 1}
+              panelThreadRef={panelThreadRef}
               projectTitle={
                 projectByKey.get(`${thread.environmentId}:${thread.projectId}`)?.title ?? null
               }
