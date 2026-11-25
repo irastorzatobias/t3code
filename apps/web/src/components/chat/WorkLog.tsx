@@ -61,7 +61,8 @@ function WorkLogLine({ icon, label, trailing, wrapLabel, ...lineProps }: RowCont
     <div
       {...lineProps}
       className={cn(
-        "flex min-h-6 min-w-0 gap-1.5 text-sm leading-relaxed select-none [&_*]:select-none",
+        // Smaller and dimmer than chat prose, so tool activity reads as a side channel.
+        "flex min-h-6 min-w-0 gap-1.5 text-xs leading-relaxed select-none [&_*]:select-none",
         wrapLabel ? "items-start" : "items-center",
         lineProps.role === "button" && focusRingClassName,
       )}
@@ -76,7 +77,7 @@ function WorkLogLine({ icon, label, trailing, wrapLabel, ...lineProps }: RowCont
         ) : null}
         <div
           className={cn(
-            "min-w-0 flex-1 text-secondary-label",
+            "min-w-0 flex-1 text-muted-foreground",
             !wrapLabel && "truncate [&_*]:whitespace-nowrap",
           )}
         >
