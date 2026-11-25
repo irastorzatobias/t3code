@@ -873,6 +873,37 @@ export function PullRequestLinksOpenInAppSetting() {
   );
 }
 
+/** Where branch-named Jira keys (`fix/PCX-123-slug`) link to, in the Threads list. */
+export function JiraSiteSetting() {
+  const gt = useGT();
+  const siteUrl = useClientSettings((settings) => settings.jiraSiteUrl);
+  const updateSettings = useUpdatePrimarySettings();
+  const valid = siteUrl === "" || /^https?:\/\/[^/\s]+/.test(siteUrl);
+
+  return (
+    <SettingsRow
+      title={gt("Jira site")}
+      description={gt(
+        "Threads whose branch names a Jira key, like fix/ABC-123, link to that task on this site.",
+      )}
+      status={valid ? undefined : gt("Enter an http or https URL.")}
+      control={
+        <DraftInput
+          nativeInput
+          size="sm"
+          className="w-full sm:w-64"
+          aria-label={gt("Jira site")}
+          placeholder="https://example.atlassian.net"
+          autoCapitalize="none"
+          spellCheck={false}
+          value={siteUrl}
+          onCommit={(next) => updateSettings({ jiraSiteUrl: next.trim() })}
+        />
+      }
+    />
+  );
+}
+
 function DeviceIntegrationSettings() {
   const gt = useGT();
   const { search, environment: selected } = useSettingsScope();

@@ -122,7 +122,7 @@ import { nativeLanguageName, SYSTEM_LANGUAGE } from "@t3tools/client-runtime/loc
 import { SUPPORTED_LOCALES } from "../../i18n/locales";
 import { BackgroundActivitySettingsRow } from "./BackgroundActivitySettings";
 import { AdvancedSettings } from "./AdvancedSettings";
-import { PullRequestLinksOpenInAppSetting } from "./IntegrationsSettings";
+import { JiraSiteSetting, PullRequestLinksOpenInAppSetting } from "./IntegrationsSettings";
 import { StorageCleanupSections } from "./StorageSettings";
 import { UpdateTrackSwitchDialog } from "./UpdateTrackSwitchDialog";
 import { environmentIdsKey } from "~/state/environmentAtomList";
@@ -1846,6 +1846,7 @@ export function DiffsSettingsPanel() {
           }
         />
         <PullRequestLinksOpenInAppSetting />
+        <JiraSiteSetting />
       </SettingsSection>
     </SettingsPageContainer>
   );

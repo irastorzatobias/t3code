@@ -3,6 +3,24 @@ import { resolveThreadCurrentPullRequestLink } from "@t3tools/client-runtime/thr
 import type { SidebarThreadSummary } from "../../types";
 import { hasUnseenCompletion, resolveSidebarRowStatus } from "../Sidebar.logic";
 
+const ISSUE_KEY_PATTERN = /(?:^|[^A-Za-z0-9])([A-Za-z][A-Za-z0-9]+-\d+)(?![0-9])/;
+
+/**
+ * The Jira task a thread's branch names (`fix/PCX-123-slug`), on the configured site.
+ * Null without a site, a valid http(s) site, or a key in the branch.
+ */
+export function jiraIssueFromBranch(
+  branch: string | null | undefined,
+  siteUrl: string,
+): { readonly key: string; readonly url: string } | null {
+  const site = siteUrl.trim().replace(/\/+$/, "");
+  if (!branch || !/^https?:\/\/[^/\s]+/.test(site)) return null;
+  const match = ISSUE_KEY_PATTERN.exec(branch);
+  if (!match?.[1]) return null;
+  const key = match[1].toUpperCase();
+  return { key, url: `${site}/browse/${key}` };
+}
+
 export const THREADS_PANEL_FILTERS = ["all", "attention", "failing", "unread", "working"] as const;
 export type ThreadsPanelFilter = (typeof THREADS_PANEL_FILTERS)[number];
 

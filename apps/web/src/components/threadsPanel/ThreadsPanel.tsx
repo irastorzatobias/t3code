@@ -28,6 +28,7 @@ import { resolveThreadStatusPill, searchSidebarThreads } from "../Sidebar.logic"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 import {
   countThreadsByPanelFilter,
+  jiraIssueFromBranch,
   THREADS_PANEL_FILTERS,
   threadMatchesPanelFilter,
   type ThreadsPanelFilter,
@@ -71,7 +72,15 @@ function ThreadPullRequestLink({ thread, panelThreadRef }: RowLinkProps) {
 
 function ThreadIssueLink({ thread, panelThreadRef }: RowLinkProps) {
   const openLink = useOpenLink(panelThreadRef);
-  const issue = thread.issues?.[0];
+  const jiraSiteUrl = useClientSettings((settings) => settings.jiraSiteUrl);
+  // A linked issue wins; otherwise the Jira key the branch names, when a site is set.
+  const linked = thread.issues?.[0];
+  const issue = linked
+    ? { url: linked.url, displayKey: linked.displayKey }
+    : (() => {
+        const fromBranch = jiraIssueFromBranch(thread.branch, jiraSiteUrl);
+        return fromBranch ? { url: fromBranch.url, displayKey: fromBranch.key } : undefined;
+      })();
   if (issue === undefined) return null;
   return (
     <a

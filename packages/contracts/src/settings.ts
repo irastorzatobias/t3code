@@ -576,6 +576,9 @@ export const ClientSettingsSchema = Schema.Struct({
   sidebarThreadSortOrder: SidebarThreadSortOrder.pipe(
     Schema.withDecodingDefault(Effect.succeed(DEFAULT_SIDEBAR_THREAD_SORT_ORDER)),
   ),
+  // Jira site (https://example.atlassian.net). Threads whose branch names a key like
+  // ABC-123 link to that task on it; empty turns branch-derived Jira links off.
+  jiraSiteUrl: Schema.String.pipe(Schema.withDecodingDefault(Effect.succeed(""))),
   timestampFormat: TimestampFormat.pipe(
     Schema.withDecodingDefault(Effect.succeed(DEFAULT_TIMESTAMP_FORMAT)),
   ),
@@ -2173,6 +2176,7 @@ export const ClientSettingsPatch = Schema.Struct({
   ),
   sidebarProjectSortOrder: Schema.optionalKey(SidebarProjectSortOrder),
   sidebarThreadSortOrder: Schema.optionalKey(SidebarThreadSortOrder),
+  jiraSiteUrl: Schema.optionalKey(Schema.String),
   timestampFormat: Schema.optionalKey(TimestampFormat),
   voiceMicrophone: Schema.optionalKey(Schema.String),
   voiceMicrophones: Schema.optionalKey(Schema.Array(VoiceMicrophoneEntry)),
