@@ -1037,6 +1037,16 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
   // Row callbacks capture only the handler; the rest of the context changes with the route.
   const { handleNewThread } = newThreadContext;
   const primaryEnvironmentId = usePrimaryEnvironmentId();
+  // Thread rows name the machine only when it isn't this one: local is the default.
+  const threadRowEnvironmentLabel = (environmentId: EnvironmentId) =>
+    environmentId === primaryEnvironmentId
+      ? null
+      : (environmentLabelById.get(environmentId) ?? null);
+  // "No project" says nothing on a row; only real projects get named.
+  const threadRowProjectName = (thread: SidebarThreadSummary) => {
+    const key = `${thread.environmentId}:${thread.projectId}` as const;
+    return projectByKey.get(key)?.isScratch ? null : (projectDisplayNameByKey.get(key) ?? null);
+  };
   const clearSelection = useThreadSelectionStore((s) => s.clearSelection);
   const setSelectionAnchor = useThreadSelectionStore((s) => s.setAnchor);
   const toggleThreadSelection = useThreadSelectionStore((s) => s.toggleThread);
@@ -3508,12 +3518,8 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                           project={
                             projectByKey.get(`${thread.environmentId}:${thread.projectId}`) ?? null
                           }
-                          projectDisplayName={
-                            projectDisplayNameByKey.get(
-                              `${thread.environmentId}:${thread.projectId}`,
-                            ) ?? null
-                          }
-                          environmentLabel={environmentLabelById.get(thread.environmentId) ?? null}
+                          projectDisplayName={threadRowProjectName(thread)}
+                          environmentLabel={threadRowEnvironmentLabel(thread.environmentId)}
                           environmentMachine={
                             environmentMachineById.get(thread.environmentId) ?? "server"
                           }
@@ -3722,9 +3728,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                             jumpLabel={
                               showJumpHints ? (jumpLabelByKey.get(threadKey) ?? null) : null
                             }
-                            environmentLabel={
-                              environmentLabelById.get(thread.environmentId) ?? null
-                            }
+                            environmentLabel={threadRowEnvironmentLabel(thread.environmentId)}
                             environmentMachine={
                               environmentMachineById.get(thread.environmentId) ?? "server"
                             }
@@ -3732,11 +3736,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                               projectByKey.get(`${thread.environmentId}:${thread.projectId}`) ??
                               null
                             }
-                            projectDisplayName={
-                              projectDisplayNameByKey.get(
-                                `${thread.environmentId}:${thread.projectId}`,
-                              ) ?? null
-                            }
+                            projectDisplayName={threadRowProjectName(thread)}
                             providerEntryByInstanceId={
                               providerEntriesByEnvironment.get(thread.environmentId) ??
                               EMPTY_PROVIDER_ENTRIES
