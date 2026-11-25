@@ -115,7 +115,9 @@ describe("sidebar header new thread", () => {
       </SidebarProvider>,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "New thread", exact: true }), {
+    // Empty boring-sidebar folders also offer New thread; the header's comes first.
+    const headerNewThread = screen.getByRole("button", { name: "New thread", exact: true }).first();
+    await userEvent.click(headerNewThread, {
       modifiers: scenario.shift ? ["Shift"] : [],
     });
 
